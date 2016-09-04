@@ -1,7 +1,8 @@
+import java.io.*;
+
 /**
  * Provides helper functions to perform locker operations
  */
-
 public class LockerHelper {
 
     /**
@@ -66,5 +67,21 @@ public class LockerHelper {
 
 
 
-    // public static String encryptXOR
+    private static String _XORLocker(String inputString, String password) {
+        StringBuilder encryptedText= new StringBuilder();
+
+        for(int i= 0; i< inputString.length(); i++){
+            encryptedText.append((char) (inputString.charAt(i) ^ password.charAt(i % password.length())));
+        }
+
+        return encryptedText.toString();
+    }
+
+    public static String encryptXOR(String inputString, String password) {
+        return _XORLocker(inputString, password);
+    }
+
+    public static String decryptXOR(String inputString, String password) {
+        return _XORLocker(inputString, password);
+    }
 }

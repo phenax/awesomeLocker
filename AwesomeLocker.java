@@ -1,40 +1,113 @@
 import java.io.*;
 
 /**
- * Generates an encrypted file fo
+ * Locker for encrypting or decrypting files
  *
  * @author Akshay Nair <phenax5@gmail.com>
  */
 public class AwesomeLocker {
 
-    AwesomeLocker() {
+    // Encryption type constants
+    public static int XOR= 0;
+    public static int CAESAR= 1;
 
-        // String str= LockerHelper.encryptCaesarCipher("Hello", 3);
-        //
-        // System.out.println(str);
-        // System.out.println(LockerHelper.decryptCaesarCipher(str, 3));
+    // Type of encryption(default= CAESAR)
+    private int type= XOR;
 
+    // Constructor
+    AwesomeLocker(int type) {
+
+        if(type != XOR && type != CAESAR) {
+            System.out.println("Wrong encryption type specified");
+            System.exit(1);
+        }
+
+        this.type= type;
     }
 
 
+    /**
+     * Encrypt file
+     *
+     * @param  The name of the input file
+     * @param  The name of the file to dump the output into
+     * @param  The encryption password
+     */
     public void encryptFile(String fileName, String outputFileName, String password) {
 
-        int key= _getIntKeyFromString(password);
-
-        encryptFileWithIntKey(fileName, outputFileName, key);
+        if(this.type == XOR) {
+            this.encryptFileXOR(fileName, outputFileName, password);
+        } else {
+            this.encryptFileCaesar(fileName, outputFileName, password);
+        }
     }
 
 
+    /**
+     * Decrypt file
+     */
     public void decryptFile(String fileName, String outputFileName, String password) {
 
+        if(this.type == XOR) {
+            this.decryptFileXOR(fileName, outputFileName, password);
+        } else {
+            this.decryptFileCaesar(fileName, outputFileName, password);
+        }
+    }
+
+
+    /**
+     * Encrypt file with XOR cipher
+     */
+    public void encryptFileXOR(String fileName, String outputFileName, String password) {
+
+        String inputString= _readFile(fileName);
+
+        String encryptedString= LockerHelper.encryptXOR(inputString, password);
+
+        _writeFile(outputFileName, encryptedString);
+    }
+
+    /**
+     * Decrypt file with XOR cipher
+     */
+    public void decryptFileXOR(String fileName, String outputFileName, String password) {
+
+        String inputString= _readFile(fileName);
+
+        String decryptedString= LockerHelper.decryptXOR(inputString, password);
+
+        _writeFile(outputFileName, decryptedString);
+    }
+
+
+    /**
+     * Encrypt file with Caesar cipher
+     */
+    public void encryptFileCaesar(String fileName, String outputFileName, String password) {
+
         int key= _getIntKeyFromString(password);
 
-        decryptFileWithIntKey(fileName, outputFileName, key);
+        encryptFileCaesarWithIntKey(fileName, outputFileName, key);
+    }
+
+
+    /**
+     * Decrypt file with Caesar cipher
+     */
+    public void decryptFileCaesar(String fileName, String outputFileName, String password) {
+
+        int key= _getIntKeyFromString(password);
+
+        decryptFileCaesarWithIntKey(fileName, outputFileName, key);
     }
 
 
 
-    public void encryptFileWithIntKey(String fileName, String outputFileName, int pass) {
+    /**
+     * Encrypt file with Caesar cipher with an integer as the key
+     */
+    public void encryptFileCaesarWithIntKey(String fileName, String outputFileName, int pass) {
 
         String inputString= _readFile(fileName);
 
@@ -44,7 +117,11 @@ public class AwesomeLocker {
     }
 
 
-    public void decryptFileWithIntKey(String fileName, String outputFileName, int pass) {
+
+    /**
+     * Decrypt file with Caesar cipher with an integer as the key
+     */
+    public void decryptFileCaesarWithIntKey(String fileName, String outputFileName, int pass) {
 
         String inputString= _readFile(fileName);
 
@@ -54,6 +131,12 @@ public class AwesomeLocker {
     }
 
 
+    /**
+     * Convert a string to an integer key
+     *
+     * @param  password  Encryption password as string
+     * @return           Integer key for encryption
+     */
     private int _getIntKeyFromString(String password) {
         int key= 0;
 
@@ -66,59 +149,70 @@ public class AwesomeLocker {
 
 
 
+    /**
+     * Dump a string into a file
+     *
+     * @param  The name of the file to dump contents into
+     * @param  The string to dump
+     */
     private void _writeFile(String fileName, String writeStr) {
 
-        FileWriter out = null;
+        FileWriter output = null;
 
         try {
-            out = new FileWriter(fileName);
+            output = new FileWriter(fileName);
 
             for(int i= 0; i< writeStr.length(); i++) {
-                out.write(writeStr.charAt(i));
+                output.write(writeStr.charAt(i));
             }
         } catch(IOException e) {
-            System.out.println("IOERR");
+            System.out.println(" -- IOERR while writing --");
+            e.printStackTrace();
         } finally {
             try {
-                if (out != null)
-                    out.close();
+                if (output != null)
+                    output.close();
             } catch(IOException e) {
-                System.out.println("IOERR on close");
+                System.out.println(" -- IOERR on closing stream --");
+                e.printStackTrace();
             }
         }
     }
 
 
+
+    /**
+     * Read a file and return it as a string
+     *
+     * @param  fileName  The name of the file to read
+     *
+     * @return           The contents of the file as a string
+     */
     public String _readFile(String fileName) {
         StringBuilder str= new StringBuilder();
 
-        FileReader in = null;
+        FileReader input = null;
 
         try {
-            in = new FileReader(fileName);
-            // out = new FileWriter(outputFileName);
+            input = new FileReader(fileName);
 
             int c;
-            while ((c = in.read()) != -1) {
-                // out.write(c);
+            while ((c = input.read()) != -1) {
                 str.append((char) c);
             }
         } catch(IOException e) {
-            System.out.println("IOERR");
+            System.out.println(" -- IOERR while reading --");
+            e.printStackTrace();
         } finally {
             try {
-                if (in != null)
-                    in.close();
+                if (input != null)
+                    input.close();
             } catch(IOException e) {
-                System.out.println("IOERR on close");
+                System.out.println(" -- IOERR on closing stream --");
+                e.printStackTrace();
             }
         }
 
         return str.toString();
-    }
-
-
-    public static void main(String[] args) {
-        // Parse args
     }
 }
